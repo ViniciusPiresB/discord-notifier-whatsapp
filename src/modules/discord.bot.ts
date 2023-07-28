@@ -1,20 +1,14 @@
 import { Client, GatewayIntentBits } from "discord.js";
-import { Whatsapp } from "venom-bot";
+import { Whatsapp } from "./whatsapp";
 
 export class DiscordBot {
-  clientWhatsapp: Whatsapp;
-  groupId: string;
+  whatsapp: Whatsapp;
 
-  constructor(groupId: string, client: Whatsapp) {
-    this.groupId = groupId;
-    this.clientWhatsapp = client;
+  constructor(whatsapp: Whatsapp) {
+    this.whatsapp = whatsapp;
   }
 
-  async sendTextMessage(message: string) {
-    this.clientWhatsapp.sendText(this.groupId, message);
-  }
-
-  getClient() {
+  private createClient() {
     const client = new Client({
       intents: [
         GatewayIntentBits.Guilds,
@@ -24,11 +18,17 @@ export class DiscordBot {
       ]
     });
 
+    return client;
+  }
+
+  private checkClientReady(client: Client) {
     client.on("ready", () => {
       if (!client.user) return;
-      console.log(`Bot está online como ${client.user.tag}`);
+      console.log(`Bot is online as ${client.user.tag}`);
     });
+  }
 
+  private detectVoiceStatusUpdates(client: Client) {
     client.on("voiceStateUpdate", (oldState, newState) => {
       const newUserChannel = newState.channel;
       const oldUserChannel = oldState.channel;
@@ -36,18 +36,27 @@ export class DiscordBot {
       if (!oldUserChannel && newUserChannel) {
         if (!newState.member) return;
 
-        this.sendTextMessage(
-          `${newState.member.user.tag} entrou no canal ${newUserChannel.name}.`
+        this.whatsapp.sendTextMessage(
+          `${newState.member.user
+            .tag} entered in channel ${newUserChannel.name}.`
         );
       }
 
       if (oldState.channel && !newState.channel) {
         if (!oldState.member) return;
-        this.sendTextMessage(
-          `${oldState.member.user.tag} saiu do canal ${oldState.channel.name}`
+        this.whatsapp.sendTextMessage(
+          `${oldState.member.user.tag} exit from channel ${oldState.channel
+            .name}`
         );
       }
     });
+  }
+
+  public makeBot() {
+    const client = this.createClient();
+
+    this.checkClientReady(client);
+    this.detectVoiceStatusUpdates(client);
 
     return client;
   }
