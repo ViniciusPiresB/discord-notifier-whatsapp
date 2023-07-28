@@ -18,6 +18,8 @@
   },
   "dependencies": {
     "discord.js": "^14.11.0",
-    "dotenv": "^16.3.1"
+    "dotenv": "^16.3.1",
+    "npm-check-updates": "^16.10.17",
+    "venom-bot": "^5.0.13"
   }
 }
