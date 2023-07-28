@@ -1,16 +1,17 @@
 import { create } from "venom-bot";
-import client from "./modules/discord.bot";
 import dotenv from "dotenv";
-import { start } from "./modules/whatsapp";
-
+import { DiscordBot } from "./modules/discord.bot";
 dotenv.config();
-(async () => {
-  client.login(process.env.BOT_TOKEN);
 
+(async () => {
   const venomClient = await create({
     session: "bot-discord-whatsapp",
     disableWelcome: true
   });
 
-  start(venomClient);
+  const discordBot = new DiscordBot("120363045369706847@g.us", venomClient);
+
+  const discordClient = discordBot.getClient();
+
+  discordClient.login(process.env.BOT_TOKEN);
 })();
